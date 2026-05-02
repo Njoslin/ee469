@@ -1,0 +1,125 @@
+module PipelineRegister2_InstructionDecode_Execution (clk, reset, enable, ID_2_pc, ID_2_ReadData1, ID_2_ReadData2, ID_2_signExtended,
+
+ID_2_instruc_OPCODE, ID_2_reg_Address, EX_3_pc, EX_3_ReadData1, EX_3_ReadData2, EX_3_signExtended, EX_3_instruc_OPCODE, EX_3_reg_Address,
+
+ID_2_Reg2Loc, ID_2_CBZBranch, ID_2_MemRead, ID_2_MemtoReg, ID_2_MemWrite, ID_2_ALUSrc, ID_2_RegWrite, ID_2_UnconditionalBranch, ID_2_BranchLessThan, ID_2_BranchLink, ID_2_BranchRegister,
+
+EX_3_Reg2Loc, EX_3_CBZBranch, EX_3_MemRead, EX_3_MemtoReg, EX_3_MemWrite, EX_3_ALUSrc, EX_3_RegWrite, EX_3_UnconditionalBranch, EX_3_BranchLessThan, EX_3_BranchLink, EX_3_BranchRegister,
+
+ID_2_ALUOp, EX_3_ALUOpEX);
+
+
+
+input logic [63:0] ID_2_pc, ID_2_ReadData1, ID_2_ReadData2, ID_2_signExtended;
+
+output logic [63:0] EX_3_pc, EX_3_ReadData1, EX_3_ReadData2, EX_3_signExtended;
+
+
+input logic [10:0] ID_2_instruc_OPCODE;
+
+output logic [10:0] EX_3_instruc_OPCODE;
+
+
+input logic [4:0] ID_2_reg_Address;
+
+output logic [4:0] EX_3_reg_Address;
+
+
+//default DFF inputs.
+input logic clk, reset, enable; 
+
+//control inputs to  ID HALF
+input logic ID_2_Reg2Loc, ID_2_CBZBranch, ID_2_MemRead, ID_2_MemtoReg, ID_2_MemWrite, ID_2_ALUSrc, ID_2_RegWrite, 
+ID_2_UnconditionalBranch, ID_2_BranchLessThan, ID_2_BranchLink, ID_2_BranchRegister;
+
+//control outputs to EX HALF
+output logic EX_3_Reg2Loc, EX_3_CBZBranch, EX_3_MemRead, EX_3_MemtoReg, EX_3_MemWrite, EX_3_ALUSrc, EX_3_RegWrite, 
+EX_3_UnconditionalBranch, EX_3_BranchLessThan, EX_3_BranchLink, EX_3_BranchRegister; //may not need to have reg2loc in register as it is used immediatly
+
+//control inputs to ID HALF
+input logic [1:0] ID_2_ALUOp;
+
+//control inputs to EX HALF
+output logic [1:0] EX_3_ALUOpEX;
+
+
+//pc reg
+Uni_Enable_DFF #(.WIDTH(64)) ProgramCounter_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_pc), .q(EX_3_pc));
+
+//readdata1reg
+Uni_Enable_DFF #(.WIDTH(64)) ReadData1_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_ReadData1), .q(EX_3_ReadData1));
+
+//readdata2reg
+Uni_Enable_DFF #(.WIDTH(64)) ReadData2_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_ReadData2), .q(EX_3_ReadData2));
+
+//sign extended reg
+Uni_Enable_DFF #(.WIDTH(64)) SignExtend_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_signExtended), .q(EX_3_signExtended));
+
+//instruction opcode
+Uni_Enable_DFF #(.WIDTH(11)) InstructionOPCODE_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_instruc_OPCODE), .q(EX_3_instruc_OPCODE));
+
+//register address
+Uni_Enable_DFF #(.WIDTH(5)) registerAddress_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_reg_Address), .q(EX_3_reg_Address));
+
+
+
+//control inputs
+//Reg2Loc
+Uni_Enable_DFF #(.WIDTH(1)) Reg2Loc_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_Reg2Loc), .q(EX_3_Reg2Loc));
+
+//CBZ
+Uni_Enable_DFF #(.WIDTH(1)) CBZBranch_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_CBZBranch), .q(EX_3_CBZBranch));
+
+//MemRead
+Uni_Enable_DFF #(.WIDTH(1)) MemRead_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_MemRead), .q(EX_3_MemRead));
+
+//MemtoReg
+Uni_Enable_DFF #(.WIDTH(1)) MemtoReg_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_MemtoReg), .q(EX_3_MemtoReg));
+
+//MemWrite
+Uni_Enable_DFF #(.WIDTH(1)) MemWrite_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_MemWrite), .q(EX_3_MemWrite));
+
+//ALUSrc --> 1'b
+Uni_Enable_DFF #(.WIDTH(1)) ALUSrc_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_ALUSrc), .q(EX_3_ALUSrc));
+
+//ALUOp --> 2'b
+Uni_Enable_DFF #(.WIDTH(2)) ALUop_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_ALUOp), .q(EX_3_ALUOpEX));
+
+//RegWrite
+Uni_Enable_DFF #(.WIDTH(1)) RegWrite_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_RegWrite), .q(EX_3_RegWrite));
+
+//UnconditionalBranch
+Uni_Enable_DFF #(.WIDTH(1)) UnconditionalBranch_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_UnconditionalBranch), .q(EX_3_UnconditionalBranch));
+
+//BranchLessThan
+Uni_Enable_DFF #(.WIDTH(1)) BranchLessThan_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_BranchLessThan), .q(EX_3_BranchLessThan));
+
+//BranchLink
+Uni_Enable_DFF #(.WIDTH(1)) BranchLink_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_BranchLink), .q(EX_3_BranchLink));
+
+//BranchRegister
+Uni_Enable_DFF #(.WIDTH(1)) BranchRegister_ID_EX(.clk(clk), .reset(reset), .enable(enable),
+.writeData(ID_2_BranchRegister), .q(EX_3_BranchRegister));
+
+endmodule
+
+
+
+
